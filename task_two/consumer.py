@@ -5,6 +5,7 @@ import time
 
 import pika
 
+from models import Task
 
 def main():
     credentials = pika.PlainCredentials('guest', 'guest')
@@ -15,9 +16,12 @@ def main():
     channel.queue_declare(queue='my_queue', durable=True)
 
     def callback(ch, method, properties, body):
-        message = json.loads(body.decode())
-        print(f" [x] Received {message}")
-        time.sleep(0.5)
+        pk = body.decode()
+        print(pk)
+        task = Task.objects(id=pk, completed=False).first()
+        if task:
+            task.update(set__completed=True)
+        time.sleep(0.1)
         print(f" [x] Completed {method.delivery_tag} task")
         ch.basic_ack(delivery_tag=method.delivery_tag)
 

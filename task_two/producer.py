@@ -1,7 +1,10 @@
 import json
 from datetime import datetime
-
+from faker import Faker
+fake = Faker()
 import pika
+
+from models import Task
 
 credentials = pika.PlainCredentials('guest', 'guest')
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672, credentials=credentials))
@@ -19,7 +22,11 @@ def create_tasks(nums: int):
             'payload': f"Date: {datetime.now().isoformat()}"
         }
 
-        channel.basic_publish(exchange='My exchange', routing_key='my_queue', body=json.dumps(message).encode())
+        task = Task(message=fake.sentence(nb_words=10, variable_nb_words=False))
+        task.save()
+
+
+        channel.basic_publish(exchange='My exchange', routing_key='my_queue', body=str(task.id).encode())
 
     connection.close()
 
