@@ -7,4 +7,8 @@ connect(db="webdb",
 
 class Task(Document):
     completed = BooleanField(default=False)
+    name = StringField(max_length=150)
+    email = StringField(max_length=150)
+    phone = StringField(max_length=200)
+    comm_chan = StringField(max_length=5)
     message = StringField(max_length=150)

@@ -13,20 +13,19 @@ def main():
         pika.ConnectionParameters(host='localhost', port=5672, credentials=credentials))
     channel = connection.channel()
 
-    channel.queue_declare(queue='my_queue', durable=True)
+    channel.queue_declare(queue='email_queue', durable=True)
 
     def callback(ch, method, properties, body):
         pk = body.decode()
-        print(pk)
         task = Task.objects(id=pk, completed=False).first()
         if task:
             task.update(set__completed=True)
-        time.sleep(0.1)
-        print(f" [x] Completed {method.delivery_tag} task")
+        time.sleep(0.05)
+        print(f" Email # {method.delivery_tag} sent to {task.email} with preferred option {task.comm_chan}")
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     channel.basic_qos(prefetch_count=1)
-    channel.basic_consume(queue='my_queue', on_message_callback=callback)
+    channel.basic_consume(queue='email_queue', on_message_callback=callback)
 
     print(' [*] Waiting for messages. To exit press CTRL+C')
     channel.start_consuming()

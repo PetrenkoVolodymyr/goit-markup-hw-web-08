@@ -3,15 +3,10 @@ import re
 
 from models import Author, Quote
 
-author = 'Albert Einstein'
-
-
-
 def find_by_tag(tag: str) -> list[str | None]:
     quotes = Quote.objects(tags__iregex=tag)
     result = [q.quote for q in quotes]
     return result
-
 
 def find_by_author(author: str) -> list[list[Any]]:
     authors = Author.objects(fullname__iregex=author)
@@ -26,7 +21,6 @@ if __name__ == '__main__':
    
     while True:
         request = input('Please input "name: "+ full/part of name OR "tag" + full/ part of tag -> ')
-
 
         text = request.split()[0]
         pattern = r"\w+"
