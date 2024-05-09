@@ -1,13 +1,21 @@
-from typing import Any
 import re
+import redis
+
+from typing import Any
+from redis_lru import RedisLRU
 
 from models import Author, Quote
 
+client = redis.StrictRedis(host="localhost", port=6379, password=None)
+cache = RedisLRU(client)
+
+@cache
 def find_by_tag(tag: str) -> list[str | None]:
     quotes = Quote.objects(tags__iregex=tag)
     result = [q.quote for q in quotes]
     return result
 
+@cache
 def find_by_author(author: str) -> list[list[Any]]:
     authors = Author.objects(fullname__iregex=author)
     result = {}
@@ -26,13 +34,12 @@ if __name__ == '__main__':
         pattern = r"\w+"
         match = re.search(pattern, text)
         command = match.group()
+
         try: 
             text = request.split()[1]
             words_list = text.split(",")
         except:
             pass
-
-
 
         match command:
             case "name":
